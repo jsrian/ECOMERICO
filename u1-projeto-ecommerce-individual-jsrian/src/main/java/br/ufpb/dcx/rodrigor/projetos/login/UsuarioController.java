@@ -21,6 +21,7 @@ public class UsuarioController {
         ctx.render("/login/formulario_signup.html");
     }
 
+
     public void cadastrarUsuario(Context ctx) {
         UsuarioService usuarioService = ctx.appData(Keys.USUARIO_SERVICE.key());
         String nome = ctx.formParam("nome");

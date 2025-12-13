@@ -21,15 +21,14 @@ public class ProdutoController {
     public ProdutoController() {
         this.produtoService =null;
     }
-    public ProdutoController(ProdutoService produtoService) {
-        this.produtoService = produtoService;
+
+    public void mostrarTelaProdutos(Context ctx){
+        ProdutoService produtoService = ctx.appData(Keys.PRODUTO_SERVICE.key());
+        List<Produto> produtos = produtoService.listarProdutos();
+        ctx.attribute("produtos",produtos);
+        ctx.render("/carrinho/tela_produto.html");
     }
 
-    public void mostrarFormulario(Context ctx) {
-        ProdutoService produtoService = ctx.appData(Keys.PRODUTO_SERVICE.key());
-        ctx.attribute("produtos", produtoService.listarProdutos());
-        ctx.render("/produtos/form_produtos.html");
-    }
     public void mostrarFormularioCadastro(Context ctx) {
         ctx.render("/produtos/form_produtos.html");
     }

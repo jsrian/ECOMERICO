@@ -1,14 +1,14 @@
 package br.ufpb.dcx.rodrigor.projetos;
 
+import br.ufpb.dcx.rodrigor.projetos.carrinho.controllers.CarrinhoController;
+import br.ufpb.dcx.rodrigor.projetos.carrinho.services.CarrinhoServices;
+import br.ufpb.dcx.rodrigor.projetos.db.H2Console;
 import br.ufpb.dcx.rodrigor.projetos.form.controller.FormController;
-import br.ufpb.dcx.rodrigor.projetos.form.services.FormService;
 import br.ufpb.dcx.rodrigor.projetos.login.LoginController;
 import br.ufpb.dcx.rodrigor.projetos.login.UsuarioController;
 import br.ufpb.dcx.rodrigor.projetos.login.UsuarioService;
-import br.ufpb.dcx.rodrigor.projetos.participante.controllers.ParticipanteController;
-import br.ufpb.dcx.rodrigor.projetos.participante.services.ParticipanteService;
-import br.ufpb.dcx.rodrigor.projetos.projeto.controllers.ProjetoController;
-import br.ufpb.dcx.rodrigor.projetos.projeto.services.ProjetoService;
+
+import br.ufpb.dcx.rodrigor.projetos.login.VerificaLogin;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
@@ -32,7 +32,6 @@ public class App {
 
     private static final int PORTA_PADRAO = 8000;
 
-    //Propriedades do application.properties:
     private static final String PROP_PORTA_SERVIDOR = "porta.servidor";
 
 
@@ -42,12 +41,13 @@ public class App {
         this.propriedades = carregarPropriedades();
     }
 
+
+
     public void iniciar() {
         Javalin app = inicializarJavalin();
         configurarPaginasDeErro(app);
         configurarRotas(app);
 
-        // Lidando com exceções não tratadas
         app.exception(Exception.class, (e, ctx) -> {
             logger.error("Erro não tratado", e);
             ctx.status(500);
@@ -91,46 +91,44 @@ public class App {
 private void registrarServicos(JavalinConfig config) {
     br.ufpb.dcx.rodrigor.projetos.db.Database.init();
     config.appData(Keys.DB_CONNECTION.key(), br.ufpb.dcx.rodrigor.projetos.db.Database.getConnection());
-    ParticipanteService participanteService = new ParticipanteService("http://localhost:8001");
-    config.appData(Keys.PROJETO_SERVICE.key(), new ProjetoService(participanteService));
-    config.appData(Keys.PARTICIPANTE_SERVICE.key(), participanteService);
     config.appData(Keys.USUARIO_SERVICE.key(), new UsuarioService());
-    config.appData(Keys.FORM_SERVICE.key(), new FormService());
     config.appData(Keys.PRODUTO_SERVICE.key(), new ProdutoService());
+    config.appData(Keys.CARRINHO_SERVICE.key(), new CarrinhoServices());
 }
 
 
     private void configurarRotas(Javalin app) {
-        LoginController loginController = new LoginController();
-        app.get("/login", loginController::mostrarPaginaLogin);
-        app.post("/login", loginController::processarLogin);
-        app.get("/logout", loginController::logout);
+        ProdutoService produtoService = new ProdutoService(); // Crie sua instância
+        CarrinhoServices carrinhoServices = new CarrinhoServices();
+        CarrinhoController carrinhoController = new CarrinhoController(carrinhoServices, produtoService);
+        app.get("/add_carrinho/{produtoId}", carrinhoController::adicionarItemAoCarrinho);
+        app.get("/carrinho", carrinhoController :: mostrarTelaCarrinho);
+        app.post("/iniciar_checkout", ctx -> {
+            carrinhoServices.persistirCarrinho(ctx);
+            ctx.redirect("/pagamento");
+        });
 
-        app.get("/area-interna", ctx -> {
-            if (ctx.sessionAttribute("usuario") == null) {
+        LoginController loginController = new LoginController();
+        app.before("/produtos",ctx -> {
+            if (!"true".equals(ctx.sessionAttribute(VerificaLogin.USUARIO_LOGADO))) {
+                // Redireciona
                 ctx.redirect("/login");
-            } else {
-                ctx.render("area_interna.html");
             }
+        });
+        app.get("/login", loginController::mostrarPaginaLogin);
+        app.post("/login", VerificaLogin::postLogin);
+        app.get("/logout", ctx -> {
+            ctx.req().getSession().invalidate();
+            ctx.redirect("/login");
         });
 
         ProdutoController produtoController = new ProdutoController();
+        app.get("/inicio", produtoController :: mostrarTelaProdutos);
         app.get("/produtos/novo", produtoController::mostrarFormularioCadastro);
         app.get("/produtos", produtoController::listarProdutos);
-        app.get("/", ctx -> ctx.redirect("/login"));
+        app.get("/", ctx -> ctx.redirect("/inicio"));
         app.post("/produtos/cadastrar", produtoController::adicionarProduto);
         app.get("/produtos/{id}/remover", produtoController ::removerProduto);
-
-
-        ProjetoController projetoController = new ProjetoController();
-        app.get("/projetos", projetoController::listarProjetos);
-        app.get("/projetos/novo", projetoController::mostrarFormulario);
-        app.post("/projetos", projetoController::adicionarProjeto);
-        app.get("/projetos/{id}/remover", projetoController::removerProjeto);
-
-        ParticipanteController participanteController = new ParticipanteController();
-        app.get("/participantes", participanteController::listarParticipantes);
-
 
         // Rotas para o controlador de usuário
         UsuarioController usuarioController = new UsuarioController();
@@ -178,7 +176,6 @@ private void registrarServicos(JavalinConfig config) {
         try (InputStream input = App.class.getClassLoader().getResourceAsStream("application.properties")) {
             if(input == null){
                 logger.error("Arquivo de propriedades /src/main/resources/application.properties não encontrado");
-                logger.error("Use o arquivo application.properties.examplo como base para criar o arquivo application.properties");
                 System.exit(1);
             }
             prop.load(input);
@@ -192,6 +189,7 @@ private void registrarServicos(JavalinConfig config) {
     public static void main(String[] args) {
         try {
             new App().iniciar();
+            new H2Console().start();
         } catch (Exception e) {
             logger.error("Erro ao iniciar a aplicação", e);
             System.exit(1);

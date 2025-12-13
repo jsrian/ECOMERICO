@@ -57,4 +57,5 @@ public class Usuario {
                 ", senha='" + senha + '\'' +
                 '}';
     }
+
 }

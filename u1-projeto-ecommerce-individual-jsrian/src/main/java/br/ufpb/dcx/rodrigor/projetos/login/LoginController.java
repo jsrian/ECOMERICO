@@ -28,7 +28,7 @@ public class LoginController {
         if (usuario != null && BCrypt.checkpw(senha, usuario.getSenha())) {
             ctx.sessionAttribute("usuario", usuario);
             logger.info("Usuário '{}' autenticado com sucesso.", login);
-            ctx.redirect("/area-interna");
+            ctx.redirect("/produtos");
         } else {
             logger.warn("Tentativa de login falhou para o usuário: {}", login);
             ctx.attribute("erro", "Usuário ou senha inválidos");

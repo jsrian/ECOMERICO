@@ -1,6 +1,8 @@
 package br.ufpb.dcx.rodrigor.projetos.produtos.services;
 
 import java.util.List;
+import java.util.Optional;
+
 import br.ufpb.dcx.rodrigor.projetos.produtos.model.Produto;
 import br.ufpb.dcx.rodrigor.projetos.produtos.repository.ProdutoRepository;
 
@@ -12,7 +14,6 @@ public class ProdutoService {
         this.produtoRepository = new ProdutoRepository();
     }
 
-    // Método listar agora chama o nome correto do método no repo
     public List<Produto> listarProdutos(){
         return produtoRepository.listarProdutos();
     }
@@ -25,6 +26,10 @@ public class ProdutoService {
             throw new IllegalArgumentException("Preço inválido");
         }
         produtoRepository.salvarProduto(produto);
+    }
+    public Optional<Produto> produtoServiceFindById(String id) {
+        Produto produtoDoBD = produtoRepository.buscarPorId(id);
+        return Optional.ofNullable(produtoDoBD);
     }
 
     public void removerProduto(String id){

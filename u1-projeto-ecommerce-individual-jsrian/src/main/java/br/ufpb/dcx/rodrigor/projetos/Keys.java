@@ -1,5 +1,6 @@
 package br.ufpb.dcx.rodrigor.projetos;
 
+import br.ufpb.dcx.rodrigor.projetos.carrinho.services.CarrinhoServices;
 import br.ufpb.dcx.rodrigor.projetos.login.UsuarioService;
 import br.ufpb.dcx.rodrigor.projetos.participante.services.ParticipanteService;
 import br.ufpb.dcx.rodrigor.projetos.produtos.services.ProdutoService;
@@ -13,8 +14,9 @@ public enum Keys {
     FORM_SERVICE(new Key<ParticipanteService>("form-service")),
     USUARIO_SERVICE(new Key<UsuarioService>("usuario-service")),
     PRODUTO_SERVICE(new Key<ProdutoService>("produto-service")),
-    DB_CONNECTION(new Key<Connection>("db-connection"));
-
+    DB_CONNECTION(new Key<Connection>("db-connection")),
+    CARRINHO_SERVICE(new Key<CarrinhoServices>("carrinho-service")),
+    CARRINHO_SESSION_KEY(new Key<CarrinhoServices>("carrinho-session"));
     ;
 
     private final Key<?> k;

@@ -27,6 +27,22 @@ public final class Database {
                         descricao VARCHAR(255)
                     );
                     """);
+                stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS carrinhos (
+                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """);
+                stmt.execute("""
+                   CREATE TABLE IF NOT EXISTS itens_carrinho (
+                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        carrinho_id BIGINT NOT NULL,
+                        produto_id BIGINT NOT NULL,
+                        quantidade INT NOT NULL,
+                        FOREIGN KEY (carrinho_id) REFERENCES carrinhos(id) ON DELETE CASCADE,
+                        FOREIGN KEY (produto_id) REFERENCES produtos(id)
+                   );
+                   """);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inicializar banco H2 em arquivo", e);
@@ -51,4 +67,5 @@ public final class Database {
             conn = null;
         }
     }
+
 }
