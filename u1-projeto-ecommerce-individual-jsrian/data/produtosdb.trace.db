@@ -1,0 +1,9 @@
+2025-12-13 20:31:53.812508-03:00 jdbc[18]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ITENS_CARRINHO" not found; SQL statement:
+INSERT INTO itens_carrinho (carrinho_id, produto_id, quantidade) VALUES (?, ?, ?) [42102-224]
+2025-12-13 20:32:04.309366-03:00 jdbc[20]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ITENS_CARRINHO" not found; SQL statement:
+INSERT INTO itens_carrinho (carrinho_id, produto_id, quantidade) VALUES (?, ?, ?) [42102-224]
+2025-12-13 21:16:40.340256-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ITENS_CARRINHO" not found; SQL statement:
+INSERT INTO itens_carrinho (carrinho_id, produto_id, quantidade) VALUES (?, ?, ?) [42102-224]

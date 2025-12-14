@@ -7,24 +7,21 @@ import java.sql.Statement;
 import java.io.File;
 
 public final class Database {
-    private static Connection conn;
 
     private Database() {}
 
     public static void init() {
-        if (conn != null) return;
-        try {
-            new File("./data").mkdirs();
+        new File("./data").mkdirs();
+        try (Connection conn = DriverManager.getConnection("jdbc:h2:file:./data/produtosdb;AUTO_SERVER=TRUE", "sa", "");
+             Statement stmt = conn.createStatement()) {
 
-            conn = DriverManager.getConnection("jdbc:h2:file:./data/produtosdb;AUTO_SERVER=TRUE", "sa", "");
-
-            try (Statement stmt = conn.createStatement()) {
-                stmt.execute("""
+            stmt.execute("""
                     CREATE TABLE IF NOT EXISTS produtos (
                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
                         nome VARCHAR(255) NOT NULL,
                         preco DECIMAL(10,2) NOT NULL,
-                        descricao VARCHAR(255)
+                        descricao VARCHAR(255),
+                        image VARCHAR(255)
                     );
                     """);
                 stmt.execute("""
@@ -43,29 +40,16 @@ public final class Database {
                         FOREIGN KEY (produto_id) REFERENCES produtos(id)
                    );
                    """);
-            }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inicializar banco H2 em arquivo", e);
         }
     }
 
-    public static Connection getConnection() {
-        try {
-            if (conn == null || conn.isClosed()) {
-                conn = null;
-                init();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao verificar status da conexão", e);
-        }
-        return conn;
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:h2:file:./data/produtosdb;AUTO_SERVER=TRUE", "sa", "");
     }
 
     public static void close() {
-        if (conn != null) {
-            try { conn.close(); } catch (SQLException ignored) {}
-            conn = null;
-        }
     }
 
 }

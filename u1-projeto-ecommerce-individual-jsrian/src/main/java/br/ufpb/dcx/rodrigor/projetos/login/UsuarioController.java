@@ -54,7 +54,7 @@ public class UsuarioController {
         ctx.render("/login/lista_usuarios.html");
     }
 
-    public void removerUsuario(@NotNull Context context) {  // Fix: Add @NotNull annotation
+    public void removerUsuario(@NotNull Context context) {
         UsuarioService usuarioService = context.appData(Keys.USUARIO_SERVICE.key());
         String id = context.pathParam("id");
         usuarioService.removerUsuario(id);

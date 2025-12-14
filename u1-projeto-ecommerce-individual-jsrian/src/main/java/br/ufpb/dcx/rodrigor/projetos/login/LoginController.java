@@ -2,37 +2,34 @@ package br.ufpb.dcx.rodrigor.projetos.login;
 
 import br.ufpb.dcx.rodrigor.projetos.Keys;
 import io.javalin.http.Context;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.Map;
+
 public class LoginController {
-    private static final Logger logger = LogManager.getLogger(LoginController.class);
+    public static final String USUARIO_LOGADO = "usuario_logado";
+
 
     public void mostrarPaginaLogin(Context ctx) {
         String teste = ctx.queryParam("teste");
         if(teste != null){
             throw new RuntimeException("Erro de teste a partir do /login?teste=1");
         }
-
         ctx.render("/login/login.html");
     }
 
-    public void processarLogin(Context ctx) {
+    public static void processarLogin(Context ctx) {
         String login = ctx.formParam("login");
         String senha = ctx.formParam("senha");
-
 
         UsuarioService usuarioService = ctx.appData(Keys.USUARIO_SERVICE.key());
         Usuario usuario = usuarioService.buscarUsuarioPorLogin(login);
         if (usuario != null && BCrypt.checkpw(senha, usuario.getSenha())) {
+            ctx.sessionAttribute(USUARIO_LOGADO, "true");
             ctx.sessionAttribute("usuario", usuario);
-            logger.info("Usuário '{}' autenticado com sucesso.", login);
             ctx.redirect("/produtos");
         } else {
-            logger.warn("Tentativa de login falhou para o usuário: {}", login);
-            ctx.attribute("erro", "Usuário ou senha inválidos");
-            ctx.render("/login/login.html");
+            ctx.render("/login/login.html", Map.of("erro", "Credenciais inválidas."));
         }
     }
 

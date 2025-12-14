@@ -44,16 +44,9 @@ public class ItemCarrinho {
     }
     public BigDecimal getSubtotal() {
         BigDecimal preco = produto.getPreco();
-
-        // VERIFICAÇÃO DE SEGURANÇA: Se o preço for nulo, usamos 0.00 para evitar o erro.
         if (preco == null) {
-            // Isso indica que o produto foi carregado do BD sem preço.
-            // Retornamos ZERO, mas o problema real está na carga dos dados.
             return BigDecimal.ZERO;
         }
-
-        // Se o preço for válido, fazemos o cálculo
-        // Assumindo que você tem getQuantidade()
         return preco.multiply(new BigDecimal(getQuantidade()));
     }
 

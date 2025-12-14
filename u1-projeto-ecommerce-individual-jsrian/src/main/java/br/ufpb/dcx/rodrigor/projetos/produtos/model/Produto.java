@@ -7,15 +7,25 @@ public class Produto {
     private BigDecimal preco;
     private String descricao;
     private String id;
+    private String caminhoImagem;
 
-    public Produto(String id, String nome, BigDecimal preco, String descricao) {
+    public Produto(String id, String nome, BigDecimal preco, String descricao, String caminhoImagem) {
         this.id = id;
         this.nome = nome;
         this.preco = preco;
         this.descricao = descricao;
+        this.caminhoImagem = caminhoImagem;
     }
     
     public Produto() {
+    }
+
+    public String getCaminhoImagem() {
+        return caminhoImagem;
+    }
+
+    public void setCaminhoImagem(String caminhoImagem) {
+        this.caminhoImagem = caminhoImagem;
     }
 
     public String getNome() {

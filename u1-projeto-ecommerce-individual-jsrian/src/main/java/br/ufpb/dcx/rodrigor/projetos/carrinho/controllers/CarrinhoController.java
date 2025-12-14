@@ -2,15 +2,14 @@ package br.ufpb.dcx.rodrigor.projetos.carrinho.controllers;
 
 import br.ufpb.dcx.rodrigor.projetos.Keys;
 import br.ufpb.dcx.rodrigor.projetos.carrinho.model.Carrinho;
-import br.ufpb.dcx.rodrigor.projetos.carrinho.model.ItemCarrinho;
 import br.ufpb.dcx.rodrigor.projetos.carrinho.services.CarrinhoServices;
 import br.ufpb.dcx.rodrigor.projetos.produtos.model.Produto;
 import br.ufpb.dcx.rodrigor.projetos.produtos.services.ProdutoService;
 import io.javalin.http.Context;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 public class CarrinhoController {
 
@@ -22,41 +21,26 @@ public class CarrinhoController {
         this.produtoService = produtoService;
     }
 
-    public Optional<Produto> produtoServiceFindById(Long id) {
-        // Exemplo:
-        if (id > 0) {
-            // Supondo que você tem um construtor ou setter para o ID
-            Produto p = new Produto();
-
-            p.setId(String.valueOf(id));
-            // ... configure outros campos como nome, preco, etc.
-            return Optional.of(p);
-        }
-        return Optional.empty();
-    }
-
     public void mostrarTelaCarrinho(Context ctx){
-
         Carrinho carrinho = carrinhoServices.getCarrinhoFromSession(ctx);
-
         ctx.render("/carrinho/compra_carrinho.html", Map.of(
                 "itensCarrinho", carrinho.getItens(),
                 "totalGeral", carrinho.getTotal()
         ));
     }
+    public void mostrarPedidoFeito(Context ctx){
+        ctx.sessionAttribute(String.valueOf(Keys.CARRINHO_SESSION_KEY), null);
+        ctx.render("/carrinho/pedido_feito.html");
+    }
 
     public void adicionarItemAoCarrinho(Context ctx) {
-        // 1. Obter o ID do produto
         String produtoId;
-
         try {
             produtoId = ctx.pathParam("produtoId");
         } catch (NumberFormatException e) {
             ctx.status(400).result("ID do produto inválido.");
             return;
         }
-
-        // 2. Buscar o Produto
         Optional<Produto> produtoOpt = produtoService.produtoServiceFindById(produtoId);
         Produto produto = produtoOpt.get();
         if (produtoOpt.isEmpty()) {
@@ -64,10 +48,19 @@ public class CarrinhoController {
             return;
         }
         carrinhoServices.adicionarOuAtualizarItem(ctx, produto);
-
-        // 4. Redirecionar para o carrinho
-        ctx.redirect("/carrinho");
+        ctx.sessionAttribute("mensagemSucesso", "O produto '" + produto.getNome() + "' foi adicionado ao carrinho!");
+        ctx.redirect("/inicio");
     }
 
-    // --- ROTA DE COMPRAR (Exemplo) ---
+    public void removerItemCarrinho(Context context){
+
+        Carrinho carrinho = carrinhoServices.getCarrinhoFromSession(context); // MUDANÇA AQUI!
+        String produtoIdParaRemover = context.pathParam("produtoId");
+
+        if (carrinho != null) {
+            carrinho.removerItemPeloId(produtoIdParaRemover);
+            context.sessionAttribute(carrinhoServices.getCarrinhoKey(), carrinho);
+        }
+        context.redirect("/carrinho");
+    }
 }

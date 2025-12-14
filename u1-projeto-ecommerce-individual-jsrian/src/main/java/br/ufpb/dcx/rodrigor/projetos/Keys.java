@@ -4,12 +4,10 @@ import br.ufpb.dcx.rodrigor.projetos.carrinho.services.CarrinhoServices;
 import br.ufpb.dcx.rodrigor.projetos.login.UsuarioService;
 import br.ufpb.dcx.rodrigor.projetos.participante.services.ParticipanteService;
 import br.ufpb.dcx.rodrigor.projetos.produtos.services.ProdutoService;
-import br.ufpb.dcx.rodrigor.projetos.projeto.services.ProjetoService;
 import io.javalin.config.Key;
 import java.sql.Connection;
 
 public enum Keys {
-    PROJETO_SERVICE(new Key<ProjetoService>("projeto-service")),
     PARTICIPANTE_SERVICE(new Key<ParticipanteService>("participante-service")),
     FORM_SERVICE(new Key<ParticipanteService>("form-service")),
     USUARIO_SERVICE(new Key<UsuarioService>("usuario-service")),

@@ -24,9 +24,19 @@ public class Carrinho {
         }
     }
 
-     public void removerItem(Produto produto){
-        itens.removeIf(i-> i.getProduto().equals(produto));
-     }
+    public void removerItemPeloId(String produtoId) {
+
+        final String idURL = (produtoId != null) ? produtoId.trim() : null;
+        itens.removeIf(item -> {
+            Produto produtoEmMemoria = item.getProduto();
+            if (produtoEmMemoria == null) {
+                return false;
+            }
+            String idEmMemoria = produtoEmMemoria.getId();
+            boolean match = (idEmMemoria != null) && idEmMemoria.trim().equals(idURL);
+            return match;
+        });
+    }
 
     public List<ItemCarrinho> getItens() {
         return itens;
